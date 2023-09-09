@@ -1,0 +1,224 @@
+<!-- templates/main/create_main.html -->
+
+{% extends 'bases/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-container"> 
+	<div class="menu-title">Say it in your own words</div> 
+	<div class="card-container">
+		<div class="card-noclick">
+			<img src="{% static 'media/template.png' %}" alt="Generate Narrative" width=225 height=200>
+			<div class="card-heading">Templates</div>
+			<div class="modal-btn-row">
+				<button class="btn btn-design" onclick="open_modal('create_template_list')"><img src="{% static 'media/create.svg' %}" class="btn-icon-lg">New</button>
+				<button class="btn btn-design" onclick="open_modal('edit_template_list')"><img src="{% static 'media/edit.svg' %}" class="btn-icon-lg">Edit</button>
+			</div>
+			<div class="card-text">Create your own templates from scratch or import content from other templates.</div>
+		</div>
+		<div class="card-noclick">
+			<img src="{% static 'media/phrase.png' %}" alt="Generate Narrative" width=225 height=200>
+			<div class="card-heading">Phrases</div>
+			<div class="modal-btn-row">
+				<button class="btn btn-design" onclick="open_modal('create_phrase_list')"><img src="{% static 'media/create.svg' %}" class="btn-icon-lg">New</button>
+				<button class="btn btn-design" onclick="open_modal('edit_phrase_list')"><img src="{% static 'media/edit.svg' %}" class="btn-icon-lg">Edit</button>
+			</div>
+			<div class="card-text">Create a phrase, or small block of text, to insert into your narratives with the click of a button.</div>
+		</div>
+	</div>
+</div>
+
+<form id="main_form" method="post">
+	{% csrf_token %}
+	<input name="textbox_type" id="textbox_type" hidden>
+	<input name="textbox_pk" id="textbox_pk" hidden>
+</form>
+{% endblock %}
+
+{% block modals %}
+<div id="copy_phrase_list" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+			<div class="modal-header-mid">Copy a Phrase</div>
+			<div class="back-btn-row" onclick='open_modal("create_phrase_list")'>
+				<img src="{% static 'media/back.svg' %}" class="back-btn">
+			</div>
+		</div> 
+		<div class="modal-content"> 
+			<div class="modal-btn-row">
+				<label class="owner-select" for="phrase_owner_yours">
+					<input type="radio" id="phrase_owner_yours" name="phrase_owner" value="yours" hidden checked>
+					<span id="phrase_owner_yours_cbox" class="owner-select-cbox"></span>
+					<span>Your List</span>
+				</label>
+				<label class="owner-select" for="phrase_owner_ours">
+					<input type="radio" id="phrase_owner_ours" name="phrase_owner" value="ours" hidden>
+					<span id="phrase_owner_ours_cbox" class="owner-select-cbox"></span>
+					<span>Available</span>
+				</label>
+			</div>
+			<div class="modal-search">
+				<input id="phrase_list_search" class="modal-search-text focus" onkeyup='filter_search(this, "phrase_owner_list")' placeholder="Search">
+				<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+			</div>
+			<div id="phrase_list_yours" class="modal-list" name="phrase_owner_list">
+				{% if phrases %}
+					{% for phrase in phrases %}
+						<div class="modal-list-item hover-shadow" onclick='copy_textbox("phrase", "{{phrase.pk}}")'>{{phrase.name}}</div>
+					{% endfor %}
+				{% else %}
+					<div class="empty-list">You have no phrases created to copy.</div>
+				{% endif %}
+			</div>
+			<div id="phrase_list_ours" class="modal-list" name="phrase_owner_list" style="display: none;">
+				{% for phrase in our_phrases %}
+					<div class="modal-list-item hover-shadow" onclick='copy_textbox("phrase", "{{phrase.pk}}")'>{{phrase.name}}</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="copy_template_list" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+			<div class="modal-header">Copy a Template</div>
+			<div class="back-btn-row" onclick='open_modal("create_template_list")'>
+				<img src="{% static 'media/back.svg' %}" class="back-btn">
+			</div>
+		</div>
+		<div class="modal-content"> 
+			<div class="modal-btn-row">
+				<label class="owner-select" for="template_owner_yours">
+					<input type="radio" id="template_owner_yours" name="template_owner" value="yours" hidden checked>
+					<span id="template_owner_yours_cbox" class="owner-select-cbox"></span>
+					<span>Your List</span>
+				</label>
+				<label class="owner-select" for="template_owner_ours">
+					<input type="radio" id="template_owner_ours" name="template_owner" value="ours" hidden>
+					<span id="template_owner_ours_cbox" class="owner-select-cbox"></span>
+					<span>Available</span>
+				</label>
+			</div>
+			<div class="modal-search">
+				<input id="modal-search-text" class="modal-search-text focus" onkeyup='filter_search(this, "template_owner_list")' placeholder="Search">
+				<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+			</div>	
+			<div id="template_list_yours" class="modal-list" name="template_owner_list">
+				{% if templates %}
+					{% for template in templates %}
+						<div class="modal-list-item hover-shadow" onclick='copy_textbox("template", "{{template.pk}}")'>{{template.name}}</div>
+					{% endfor %}
+				{% else %}
+					<div class="empty-list">You have no templates created to copy.</div>
+				{% endif %}
+			</div>
+			<div id="template_list_ours" class="modal-list" name="template_owner_list" style="display: none;">
+				{% for template in our_templates %}
+					<div class="modal-list-item hover-shadow" onclick='copy_textbox("template", "{{template.pk}}")'>{{template.name}}</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="create_phrase_list" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div> 
+		<div class="modal-content">
+			<div class="modal-question">How would you like to create a new phrase?</div>
+			<div class="modal-btn-container">
+				<a class="btn btn-regular hover-shadow" onclick='create_textbox("phrase")'>From Scratch</a>
+				<a class="btn btn-regular hover-shadow" onclick='open_modal("copy_phrase_list")'>Copy Existing</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="create_template_list" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div> 
+		<div class="modal-content"> 
+			<div class="modal-question">How would you like to create a new template?</div>
+			<div class="modal-btn-container">
+				<a class="btn btn-regular hover-shadow" onclick='create_textbox("template")'>From Scratch</a>
+				<a class="btn btn-regular hover-shadow" onclick='open_modal("copy_template_list")'>Copy Existing</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="edit_phrase_list" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div> 
+		<div class="modal-content">
+			{% if phrases %}
+				<div class="modal-list">
+					<div class="modal-header">Edit a Phrase</div>
+					<div class="modal-search">
+						<input class="modal-search-text focus" onkeyup='filter_search(this, "edit_phrase_list")' placeholder="Search">
+						<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+					</div>
+					<div class="modal-list" name="edit_phrase_list">
+						{% for phrase in phrases %}
+							<a href="{% url 'main:phrase' phrase.pk %}" class="modal-list-item hover-shadow">{{phrase.name}}</a>
+						{% endfor %}
+					</div>
+				</div>
+			{% else %}
+				<div class="list-l center-items">
+					<img src="{% static 'media/not_found.svg' %}"  height=100 weight=100>
+					<div class="not-found">You Have No Custom Phrases</div>
+					<div class="modal-btn-container">
+						<button type="button" class="btn btn-save" onclick="open_modal('create_phrase_list')">Create a Phrase</button>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+
+<div id="edit_template_list" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div> 
+		<div class="modal-content">
+			{% if templates %}
+				<div class="modal-list">
+					<div class="modal-header">Edit a Template</div>
+					<div class="modal-search">
+						<input class="modal-search-text focus" onkeyup='filter_search(this, "edit_template_list")' placeholder="Search">
+						<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+					</div>
+					<div class="modal-list" name="edit_template_list">
+						{% for template in templates %}
+							<a href="{% url 'main:template' template.pk %}" class="modal-list-item hover-shadow">{{template.name}}</a>
+						{% endfor %}
+					</div>
+				</div>
+			{% else %}
+				<div class="list-l center-items">
+					<img src="{% static 'media/not_found.svg' %}"  height=100 weight=100>
+					<div class="not-found">You Have No Custom Templates</div>
+					<div class="modal-btn-container">
+						<button type="button" class="btn btn-save" onclick="open_modal('create_template_list')">Create a Template</button>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block js %}
+	<script src="{% static 'javascript/main/design_menu.js' %}"></script>
+{% endblock %}

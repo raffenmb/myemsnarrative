@@ -1,0 +1,49 @@
+<!-- templates/main/home.html -->
+
+{% extends 'bases/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-container">
+	<div class="menu-title">Let our tools do the work</div> 
+	<div class="card-container"> 
+		<div class="card hover-shadow" onclick="open_modal('generate_list')">
+			<img src="{% static 'media/generate.png' %}" alt="Generate Narrative" width=225 height=200>
+			<div class="card-heading">Generate</div>
+			<div class="card-text">Generate a narrative from your templates.</div>
+		</div>
+		<a href="{% url 'main:design_menu' %}" class="card hover-shadow">
+			<img src="{% static 'media/create.png' %}" width=225 height=200>
+			<div class="card-heading">Design</div>
+			<div class="card-text">Create and edit your own templates and phrases.</div>
+		</a>
+		<a href="{% url 'main:narrative_library' %}" class="card hover-shadow">
+			<img src="{% static 'media/library.png' %}" width=225 height=200>
+			<div class="card-heading">Library</div>
+			<div class="card-text">A list of your narratives. View and continue editing them here.</div>
+		</a>
+	</div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div id="generate_list" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div>
+		<div class="modal-content">    
+			<div class="modal-header">Generate a Narrative from one of these templates.</div>
+			<div class="modal-search">
+				<input class="modal-search-text focus" onkeyup='filter_search(this, "generate_list")' placeholder="Search">
+				<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+			</div>
+			<div id="generate_list" class="modal-list" name="generate_list">
+				{% for template in template_list %}
+					<a href="{% url 'main:generate_narrative' template.pk %}" class="modal-list-item hover-shadow">{{template.name}}</a>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

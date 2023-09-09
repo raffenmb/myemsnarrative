@@ -1,0 +1,8 @@
+<!-- templates/nav/topnav_authenticated.html -->
+
+<a href="{% url 'main:home' %}" class="topnav-title">My EMS Narrative</a>
+<div class="topnav-links">
+	<a href="{% url 'main:feedback' %}">Feedback</a>
+	<a href="{% url 'accounts:user_account' %}">{{user}}</a>
+	<a href="{% url 'accounts:logout' %}">Logout</a>
+</div>

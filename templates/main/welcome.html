@@ -1,0 +1,14 @@
+<!-- templates/main/welcome.html -->
+
+{% extends 'bases/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-container">
+	<div class="welcome-container">
+		<div class="menu-title">Complete your narratives faster</div> 
+		<div class="welcome-text">Use templates and tools written by current, working paramedics to finish your PCR narratives faster than ever.</div>
+		<a href="{% url 'accounts:login' %}"><button class="btn btn-welcome">Get Started</button></a>
+	</div>
+</div>
+{% endblock %}

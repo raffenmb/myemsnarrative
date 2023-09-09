@@ -1,0 +1,89 @@
+{% extends 'bases/base_authenticated.html' %}
+
+{% block content %}
+  <form id="main_form" class="row gap-l" style="align-items: flex-start;" method="post">
+    {% csrf_token %}
+
+    <div class="content-box">
+      <div class="text-l margin-l">Template List</div>
+      <div id="template_list" class="list-m">
+        {% for template in templates %}
+          {% if template.available %}
+            <div class="checkbox-container" style="background-color: #98FF98;">
+              <div style="display: flex">
+                <input type="checkbox" id="template_{{template.pk}}" name="selected_templates" value="{{template.pk}}" checked>
+                <label for="template_{{template.pk}}">{{template.name}}</label>
+              </div>
+              <a href="{% url 'main:template' template.pk %}"><button type="button">Edit</button></a>
+            </div>
+          {% else %}
+            <div class="checkbox-container">
+              <div style="display: flex">
+                <input type="checkbox" id="template_{{template.pk}}" name="selected_templates" value="{{template.pk}}">
+                <label for="template_{{template.pk}}">{{template.name}}</label>
+              </div>
+              <a href="{% url 'main:template' template.pk %}"><button type="button">Edit</button></a>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    <div class="content-box">
+      <div class="text-l margin-l">Treatment List</div>
+      <div id="insert_list" class="list-m">
+        {% for insert in inserts %}
+          {% if insert.available %}
+            <div class="checkbox-container" style="background-color: #98FF98;">
+              <div style="display: flex">
+                <input type="checkbox" id="insert_{{insert.pk}}" name="selected_inserts" value="{{insert.pk}}" checked>
+                <label for="insert_{{insert.pk}}">{{insert.name}}</label>
+              </div>
+              <button type="button">View</button>
+            </div>
+          {% else %}
+            <div class="checkbox-container">
+              <div style="display: flex">
+                <input type="checkbox" id="insert_{{insert.pk}}" name="selected_inserts" value="{{insert.pk}}">
+                <label for="insert_{{insert.pk}}">{{insert.name}}</label>
+              </div>
+              <button type="button">View</button>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <input name="copy_insert" id="copy_insert" hidden>
+    <input name="action1" id="action1" hidden>
+  </form>
+{% endblock %}
+
+{% block toolbar %}
+  <div class="sidebar-container space-above-l">
+    <div class="toolbar-header">EDIT SELECTIONS</div>
+    <a class="toolbar-anchor" onclick='submit_form()'>Update Selected</a>
+  </div>
+  <div class="sidebar-container space-above-l">
+    <div class="toolbar-header">CUSTOM ACTIONS</div>
+    <a class="toolbar-anchor" onclick='open_modal("confirm_action1")'>Copy Name to Question</a>
+  </div>
+{% endblock %}
+
+{% block modal %}
+  <div id="confirm_action1" class="modal">
+    <div class="modal-box">
+      <div class="close-btn-container">
+        <a onclick='close_modal("confirm_action1")'>&times;</a>
+      </div>
+      <div class="modal-content">
+        <div class="modal-text">
+          Are you sure you want to do it?
+        </div>
+        <div class="modal-btn-container">
+          <button type="button" class="btn btn-regular" onclick="add_form_value('action1')">Yes</button>
+          <button type="button" class="btn btn-regular" onclick='close_modal("confirm_action1")'>No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

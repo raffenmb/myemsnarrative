@@ -1,0 +1,27 @@
+<!-- templates/main/narrative_library.html -->
+
+{% extends 'bases/base_authenticated.html' %}
+
+{% block content %}
+<div class="library-container">
+	<div class="library-headers">
+		<div class="library-heading">Your Completed Narratives</div>
+		<div class="library-info">I don't know about your partner, but you've written {{total_written}} narratives.</div>
+	</div>
+	<div class="library-content">
+		<div class="modal-search">
+			<input class="modal-search-text" onkeyup='filter_search(this, "library_list")' placeholder="Search" autofocus>
+			<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+		</div>
+		<div id="library_list" class="modal-list" name="library_list">
+			{% for narrative in narratives %}
+				<a href="{% url 'main:narrative' narrative.pk %}" class="modal-list-item">
+					<span>{{narrative.template}}</span>
+					<span>{{narrative.created}}</span>
+				</a>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="library-pages-row"></div>
+</div>
+{% endblock %}

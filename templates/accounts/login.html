@@ -1,0 +1,40 @@
+<!-- templates/accounts/login.html -->
+
+{% extends 'bases/base.html' %}
+{% load static %}
+
+{% block content %}
+<form id="login_form" class="account-container mod-box-xs" method="post">
+	{% csrf_token %}
+	<div class="account-headers">
+		<div class="account-title">Login</div>
+	</div>
+	<div class="account-content">
+		{% if form.errors %}
+		<div class="user-account-row">
+			{% for field in form %}
+				{% for error in field.errors %}
+					<div class="invalid-authentication">{{error|escape}}</div>
+				{% endfor %}
+				{% for error in form.non_field_errors %}
+					<div class="invalid-authentication">{{error|escape}}</div>
+				{% endfor %}
+			{% endfor %}
+		</div>
+		{% endif %}
+		{% for field in form %}
+			<div class="user-account-row">
+				<div class="user-account-subheader">{{field.label_tag}}</div>
+				{{field}}
+			</div>
+		{% endfor %}
+		<div class="user-btn-container">
+			<button type="submit" class="btn btn-regular">Login</button>
+		</div>
+		<div class="row center-items margin-m">
+			<a href="{% url 'accounts:password_reset' %}">Forgot Your Password?</a>
+		</div>
+	</div>
+</form>
+{% endblock %}
+

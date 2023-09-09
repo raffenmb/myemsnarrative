@@ -1,0 +1,31 @@
+<!-- templates/main/feedback.html -->
+
+{% extends 'bases/base_authenticated.html' %}
+{% load static %}
+
+{% block page_script %}
+  <link rel="stylesheet" href="{% static 'css/form_field.css' %}">
+{% endblock %}
+
+{% block content %}
+<form id="main_form" class="content-box box-s" method="POST">
+	{% csrf_token %}
+	<div class="row margin-l">
+		<div class="text-l">Send Feedback</div>
+	</div>
+	<div class="row">
+		<div class="text-m grey">Please let us know if there's anything we can do to make this website better for you.</div>
+	</div>
+	<div class="list-m space-above-m grow">
+		<div class="list-m">
+			<label class="modal-label" for="feedback_subject">Subject</label>
+			<input id="feedback_subject" name="feedback_subject" class="modal-input" autofocus>
+		</div>
+		<label class="modal-label" for="feedback_message">Message</label>
+		<textarea id="feedback_message" name="feedback_message" class="textarea" oninput='resize_textarea("feedback_message", "feedback_message")'></textarea>
+	</div>
+	<div class="modal-btn-container">
+		<button type="submit" class="btn btn-regular" onclick="submit_form()">Send</button>
+	</div>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!-- templates/misc/acknowledgment.html -->
+
+{% extends 'bases/base.html' %}
+{% load static %}
+
+{% block content %}
+<form id="main_form" class="content" method="post">
+	{% csrf_token %}
+	<div class="content-box">
+		<div class="text-l margin-l">DO NOT ENTER INDIVIDUALLY IDENTIFIABLE HEALTH INFORMATION</div>
+		<div class="text-m margin-m">
+			myemsnarrative.com is a tool to develop and use templates for narratives using generic descriptions of an event. It is not a website to store patients' Personal Health Information. Patients' personal information such as names, addresses, birth dates, social security numbers, or anything similar are not allowed to be saved to this site. Anybody found to be violating this will be removed from myemsnarrative.com along with all of their content.
+		</div>
+		<div class="text-m margin-m">
+			By pressing "I Agree" below, you are agreeing to the <a class="sky-blue" onclick="open_modal('terms_of_use')">TERMS OF USE</a>, including agreeing not to share login credentials and not to enter any individually identifiable health information on myemsnarrative.com.
+		</div>
+		<div class="modal-btn-container">
+			<a href="{% url 'accounts:logout' %}"><button type="button" class="btn btn-regular">I Disagree</button></a> 
+			<button type="submit" class="btn btn-regular">I Agree</button>
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block modals %}
+	{% include 'misc/terms.html' %}
+{% endblock %}

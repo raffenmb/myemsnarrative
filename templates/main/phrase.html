@@ -1,0 +1,212 @@
+<!-- templates/main/phrase.html -->
+
+{% extends 'bases/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+<div class="textbox-container tb-phrase">
+	<div class="row space-between">
+		<div class="textbox-type">PHRASE</div>
+		<div class="row gap-m">	
+			<button class="btn btn-save" onclick="save_textbox(from_button=true)" title="Save phrase"><img src="{% static 'media/save.png' %}" class="btn-icon">Save</button>
+			<button class="btn btn-delete" onclick="open_modal('confirm_delete_textbox')" title="Delete phrase"><img src="{% static 'media/delete.png' %}" class="btn-icon">Delete</button>
+		</div>
+	</div>
+	<div class="textbox-name-container">
+		<input id="textbox_name" class="textbox-name-input" placeholder="Untitled" value="{{phrase.name}}">
+	</div>
+	<div id="textbox_toolbar" class="textbox-toolbar-row">
+		<div class="row gap-m">
+			<button class="btn btn-toolbar" onclick='open_input_list()'>Insert Input</button>
+			<img src="{% static 'media/create.svg' %}" class="btn btn-toolbar btn-icon hover-shadow" onclick='open_modal("create_input")' title="Create Input">
+		</div>
+	</div>
+	<div class="textbox-content-container">
+		<textarea id="textbox_content" placeholder="Add text here" class="textbox-content" oninput="resize_textarea(this)">{{phrase.content|safe}}</textarea>
+	</div>
+</div>
+
+<form id="main_form" method="post">
+	{% csrf_token %}
+	<input id="delete_textbox" name="delete_textbox" hidden>
+</form>
+{% endblock %}
+
+{% block modals %}
+<div id="confirm_delete_input" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div>
+		<div class="modal-content">
+			<div id="delete_input_text" class="modal-question"></div>
+			<div class="modal-btn-container">
+				<button id="input_delete_yes_btn" type="button" class="btn btn-regular">Yes</button>
+				<button type="button" class="btn btn-regular" onclick='close_modal()'>No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="confirm_delete_textbox" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div>
+		<div class="modal-content">
+			<div class="modal-question">
+				Are you sure you want to delete this phrase?
+			</div>
+			<div class="modal-btn-container">
+				<button type="button" class="btn btn-regular" onclick='delete_textbox("{{phrase.pk}}")'>Yes</button>
+				<button type="button" class="btn btn-regular" onclick='close_modal()'>No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="create_input" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div>
+		<div class="modal-content">
+			<div class="modal-header">Create an Input</div>
+			<div class="modal-row">
+				<div class="modal-label">Name</div>
+				<div class="invalid-form" id="invalid_input_name_new"></div>
+				<input class="modal-input focus" id="input_name_new" required>
+			</div>
+			<div id="option_input_container_new" class="modal-row">
+				<div class="modal-label">Options</div>
+				<div class="input-btn-container">
+					<input class="input-btn-field" id="option_input_new" onkeyup='append_option("new")'>
+					<button class="input-btn" onclick='append_option("new")'>+</button>
+				</div>
+			</div>
+			<div id="option_list_new" class="option-list-container"></div>
+			<div class="modal-btn-container">
+				<button class="btn btn-regular" onclick='create_input()'>Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- clone this when a new input modal is to be created with ajax -->
+<div id="input_INPUT_PK" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+			<div class="modal-header-mid">Edit Input</div>
+			<div class="back-btn-row" onclick='open_modal("insert_input_list")'>
+				<img src="{% static 'media/back.svg' %}" class="back-btn">
+			</div>
+		</div>
+		<div class="modal-content">
+			<div class="modal-row">
+				<div class="modal-label">Name</div>
+				<div class="invalid-form" id="invalid_input_name_INPUT_PK">Input name cannot be left blank</div>
+				<input class="modal-input" id="input_name_INPUT_PK" required value="INPUT_NAME">
+			</div>
+			<div id="option_input_container_INPUT_PK" class="modal-row">
+				<div class="modal-label">Options</div>
+				<div class="input-btn-container">
+					<input class="input-btn-field" id="option_input_INPUT_PK" onkeyup='append_option("INPUT_PK")'>
+					<button class="input-btn" onclick='append_option("INPUT_PK")'>+</button>
+				</div>
+			</div>
+			<div id="option_list_INPUT_PK"  class="option-list-container"></div>
+			<div class="modal-btn-container">
+				<button id="delete_input_INPUT_PK" class="btn btn-regular" onclick='open_confirm_delete_input("INPUT_NAME")'>Delete</button>
+				<button id="save_input_INPUT_PK" class="btn btn-regular" onclick='update_input("INPUT_PK", "INPUT_NAME")'>Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% for name, input in input_list.items %}
+<div id="input_{{input.pk}}" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+			<div class="modal-header-mid">Edit Input</div>
+			<div class="back-btn-row" onclick='open_modal("insert_input_list")'>
+				<img src="{% static 'media/back.svg' %}" class="back-btn">
+			</div>
+		</div>
+		<div class="modal-content">
+			<div class="modal-row">
+				<div class="modal-label">Name</div>
+				<div class="invalid-form" id="invalid_input_name_{{input.pk}}">Input name cannot be left blank</div>
+				<input class="modal-input focus" id="input_name_{{input.pk}}" required value="{{name}}">
+			</div>
+			<div id="option_input_container_{{input.pk}}" class="modal-row">
+				<div class="modal-label">Options</div>
+				<div class="input-btn-container">
+					<input class="input-btn-field" id="option_input_{{input.pk}}" onkeyup='append_option("{{input.pk}}")'>
+					<button class="input-btn" onclick='append_option("{{input.pk}}")'>+</button>
+				</div>
+			</div>
+			<div id="option_list_{{input.pk}}" class="modal-list">
+			  {% if input.options %}
+				{% for option in input.options %}
+				  <li class="movable-list-item">
+					{{option}}
+					<div class="movable-item-btns">
+					  <i class="fa-solid fa-angle-up" onclick='move_option_up(this)'></i>
+					  <i class="fa-solid fa-angle-down" onclick='move_option_down(this)'></i>
+					  <i class="fa-solid fa-xmark" onclick='delete_option(this)'></i>    
+					</div>
+				  </li>
+				{% endfor %}
+			  {% endif %}
+			</div>
+			<div class="modal-btn-container">
+				<button id="delete_input_{{input.pk}}" class="btn btn-regular" onclick='open_confirm_delete_input("{{name}}")'>Delete</button>
+				<button id="save_input_{{input.pk}}" class="btn btn-regular" onclick='update_input("{{input.pk}}", "{{name}}")'>Save</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+
+<div id="insert_input_list" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div>
+		<div class="modal-content"> 
+			<div id="insert_input_list_filled" class="modal-list" style="display: none;">
+				<div class="modal-header">Insert an Input into the Phrase</div>
+				<div class="modal-search">
+					<input class="modal-search-text focus" onkeyup='filter_search(this, "insert_input_container")' placeholder="Search">
+					<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+				</div>
+				<div id="insert_input_list_container" class="modal-list" name="insert_input_container">
+				{% for name, input in input_list.items %}
+					<div id="input_item_{{input.pk}}" class="input-item hover-shadow">
+						<div class="input-item-text" onclick='insert_input("{{input.marker}}")'>{{name}}</div>
+						<img src="{% static 'media/edit.svg' %}" class="view-icon hover-weight" onclick='open_modal("input_{{input.pk}}")' title="Edit input">
+					</div>
+				{% endfor %}
+				</div>
+			</div>
+			<div id="insert_input_list_empty" class="list-l center-items">
+				<img src="{% static 'media/not_found.svg' %}"  height=100 weight=100>
+				<div class="not-found">No Inputs Found</div>
+				<div class="modal-btn-container">
+					<button type="button" class="btn btn-save" onclick="open_modal('create_input')">Create an Input</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block js %}
+	{{ phrase.pk|json_script:"textbox_pk" }}
+	{{ input_list|json_script:"input_list" }}
+	{{ import_list|json_script:"import_list" }}
+	<input id="tb_type" value="Phrase" hidden>
+	<script src="{% static 'javascript/main/textbox.js' %}"></script>
+{% endblock %}

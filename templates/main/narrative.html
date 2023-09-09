@@ -1,0 +1,321 @@
+<!-- templates/main/narrative.html -->
+
+{% extends 'bases/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+<div class="narrative-container">
+	<div class="textbox-container tb-template">
+		<div class="row space-between">
+			<input id="narrative_name" class="narrative-name-input" placeholder="Untitled" value="{{narrative.template}}">
+			<div class="row gap-m">	
+				<button class="btn btn-save" onclick='save_narrative(from_button=true)' title="Save narrative"><img src="{% static 'media/save.png' %}" class="btn-icon">Save</button>
+				<button class="btn btn-delete" onclick='open_modal("confirm_delete_narrative")' title="Delete narrative"><img src="{% static 'media/delete.png' %}" class="btn-icon">Delete</button>
+			</div>
+		</div>
+		<div id="narrative_toolbar" class="narrative-toolbar-row">
+			<button class="btn btn-toolbar" onclick='open_phrase_list()'>Insert Phrase</button>
+			<button class="btn btn-insert" onclick='open_modal("clean_and_copy_modal")'><img src="{% static 'media/copy.png' %}" class="btn-icon">Clean and Copy</button>
+		</div>
+		<div class="textbox-content-container">
+			<textarea id="narrative_content" name="narrative_content" class="textbox-content">{{narrative.content}}</textarea>
+		</div>
+	</div>
+	{% if input_list %}
+		<div id="input_items_sidebar" class="input-items-container">
+			<div class="text-xl">Input List</div>
+			<button class="btn btn-toolbar" onclick='open_modal("confirm_remove_markers")'><img src="{% static 'media/clear.svg' %}" class="btn-icon-lg">Remove All Markers</button>
+			<div id="input_items_list" class="input-items-list">
+				{% for id, input in input_list.items %}
+					<div id="input_item_{{id}}" class="input-item hover-shadow">
+						<div class="input-item-text" onclick='open_input_box("{{id}}")'>{{input.name}}</div>
+						<img src="{% static 'media/view.png' %}" class="view-icon hover-weight" alt="Generate Narrative" onclick='scroll_to_marker("{{input.marker}}")'>
+					</div>
+				{% endfor %}
+			</div>
+		</div>
+	{% endif %}
+</div>
+
+<form id="main_form" method="post">
+	{% csrf_token %}
+	<input id="delete_narrative" name="delete_narrative" hidden>
+</form>
+{% endblock %}
+
+{% block modals %}
+<div id="clean_and_copy_modal" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div>
+		<div class="modal-content">
+			<div class="modal-header">Choose cleaning options and copy narrative</div>
+			<div class="checkbox-container">
+				<div class="modal-cb-row">
+					<input type="checkbox" class="cb-box" id="choice_remove_markers" name="clean_up_choices" value="remove_markers" checked>
+					<label for="choice_remove_markers">Remove unanswered input markers.</label>
+				</div>
+				<div class="modal-cb-row">
+					<input type="checkbox" class="cb-box" id="choice_a_to_an" name="clean_up_choices" value="a_to_an" checked>
+					<label for="choice_a_to_an">Switch "a" and "an" when appropriate.</label>
+				</div>
+				<div class="modal-cb-row">
+					<input type="checkbox" class="cb-box"  id="choice_pronouns" name="clean_up_choices" value="pronouns">
+					<label for="choice_pronouns">
+						Switch all pronouns to 
+						<select class="dd-clean" id="pronoun_choice">
+							<option value="male">male</option>
+							<option value="female">female</option>
+							<option value="non-binary">non-binary</option>
+						</select>
+					</label>
+				</div>
+			</div>
+			<div class="modal-btn-container">
+				<button type="button" class="btn btn-save" onclick='clean_and_copy()'>Copy Narrative</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="confirm_delete_narrative" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>	
+		</div>
+		<div class="modal-content">
+			<div class="modal-question">
+				Are you sure you want to delete this narrative?
+			</div>
+			<div class="modal-btn-container">
+				<button type="button" class="btn btn-regular" onclick='delete_narrative("{{narrative.pk}}")'>Yes</button>
+				<button type="button" class="btn btn-regular" onclick='close_modal()'>No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="confirm_remove_markers" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>	
+		</div>
+		<div class="modal-content">
+			<div class="modal-question">
+				This will remove all markers in your narrative and delete all inputs. Do you want to continue?
+			</div>
+			<div class="modal-btn-container">
+				<button type="button" class="btn btn-regular" onclick='remove_markers()'>Yes</button>
+				<button type="button" class="btn btn-regular" onclick='close_modal()'>No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% for id, input in input_list.items %}
+<div id="input_box_{{id}}" class="modal">
+	<div class="modal-box mod-box-m">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>	
+			<div class="narrative-btn-container">
+				<button type="button" class="btn btn-toolbar hover-shadow" onclick='open_confirm_save_option("{{id}}")'><img src="{% static 'media/save.svg' %}" class="btn-icon">Save Option</button>
+				<button type="button" id="andor_btn_{{id}}" class="btn btn-toolbar hover-shadow" style="display: none;" title="Switch between conjunctions" onclick='change_andor("{{id}}")'>And/Or</button>
+			</div>
+		</div>
+		<div class="modal-content">
+			<div class="narrative-input-container">
+				<div class="narrative-input-row">
+					<textarea id="response_{{id}}" class="narrative-input focus" placeholder="{{input.name}}" oninput="resize_textarea(this, narrative=true)"></textarea>
+					<button class="btn btn-save" onclick='submit_input_response("{{id}}")'><img src="{% static 'media/submit.png' %}" class="btn-icon">Add to Narrative</button>
+				</div>
+				<div id="narrative_options_{{id}}" class="narrative-input-options">
+					{% for option in input.options %}
+						<input type="checkbox" name="options_{{id}}" id="{{id}}_{{forloop.counter}}" onclick='update_user_response("{{id}}")' value="{{option}}" hidden>
+						<label class="narrative-option hover-shadow" for="{{id}}_{{forloop.counter}}">{{option}}</label>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="input_save_option_{{id}}" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>	
+		</div>
+		<div class="modal-content">
+			<div class="modal-question">
+				This will permanently save your response as an option for this input. Do you want to continue?
+			</div>
+			<div class="modal-btn-container">
+				<button type="button" id="save_option_yes_btn" class="btn btn-regular" onclick='save_option("{{id}}")'>Yes</button>
+				<button type="button" class="btn btn-regular" onclick='open_modal("input_box_{{id}}")'>No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="input_skip_{{id}}" class="modal">
+	<div class="modal-box">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='open_modal("input_box_{{id}}")'>&times;</a>	
+		</div>
+		<div class="modal-content">
+			<div class="modal-question">
+				Would you like to skip this input or remove it completely?
+			</div>
+			<div class="modal-btn-container">
+				<button type="button" class="btn btn-regular" onclick='open_input_box("{{id}}", next=true)'>Skip</button>
+				<button type="button" class="btn btn-regular" onclick='open_input_box("{{id}}", next=true, remove=true)'>Remove</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
+
+{% for phrase in your_phrase_list %}
+<div id="phrase_box_{{phrase.pk}}" class="modal">
+	<div class="modal-box mod-box-m">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+			<div class="modal-header-mid">{{phrase.name}}</div>
+			<div class="back-btn-row" onclick='open_modal("phrases_list")'>
+				<img src="{% static 'media/back.svg' %}" class="back-btn">
+			</div>
+		</div>
+		<div class="modal-content">
+			<div id="input_container_p_{{phrase.pk}}" class="narrative-input-container">
+				{% for input in phrase.narrative_input_list %}
+					<div id="input_container_p_{{phrase.pk}}_{{forloop.counter}}" class="list-s" style="display: none;">
+						<div class="narrative-btn-container">
+							<a id="andor_btn_p_{{input.pk}}" class="btn btn-toolbar hover-shadow" style="display: none;" title="Switch between conjunctions" onclick='change_andor("p_{{input.pk}}")'>And/Or</a>
+						</div>
+						<div class="narrative-input-row">
+							<textarea type="text" id="response_p_{{input.pk}}" class="narrative-input" placeholder="{{input.name}}"></textarea>
+							{% if forloop.counter == phrase.narrative_input_list|length %}
+								<button class="btn btn-save" onclick='add_to_phrase("p_{{input.pk}}", "{{phrase.pk}}", "{{input.marker}}", "{{forloop.counter}}", last=true)'><img src="{% static 'media/submit.png' %}" class="btn-icon">Insert and Add</button>
+							{% else %}
+								<button type="button" class="btn btn-regular" onclick='add_to_phrase("p_{{input.pk}}", "{{phrase.pk}}", "{{input.marker}}", "{{forloop.counter}}")'>Insert</button>
+							{% endif %}
+						</div>
+						<div id="narrative_options_p_{{input.pk}}" class="narrative-input-options">
+							{% for option in input.options %}
+								<input type="checkbox" name="options_p_{{input.pk}}" id="p_{{input.pk}}_{{forloop.counter}}" onclick='update_user_response("p_{{input.pk}}")' value="{{option}}" hidden>
+								<label class="narrative-option hover-shadow" for="p_{{input.pk}}_{{forloop.counter}}">{{option}}</label>
+							{% endfor %}
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+			<div class="modal-row">
+				<textarea id="phrase_content_{{phrase.pk}}" class="narrative-input" oninput="resize_textarea(this)">{{phrase.content}}</textarea>
+				<textarea id="original_p_content_{{phrase.pk}}" hidden>{{phrase.content}}</textarea>
+			</div>
+			{% if not phrase.narrative_input_list %}
+				<div class="modal-btn-row">
+					<button class="btn btn-save" onclick='insert_phrase("{{phrase.pk}}")'><img src="{% static 'media/submit.png' %}" class="btn-icon">Insert and Add</button>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endfor %}
+
+{% for phrase in our_phrase_list %}
+<div id="phrase_box_{{phrase.pk}}" class="modal">
+	<div class="modal-box mod-box-m">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+			<div class="modal-header-mid">{{phrase.name}}</div>
+			<div class="back-btn-row" onclick='open_modal("phrases_list")'>
+				<img src="{% static 'media/back.svg' %}" class="back-btn">
+			</div>
+		</div>
+		<div class="modal-content">
+			<div id="input_container_p_{{phrase.pk}}" class="narrative-input-container">
+				{% for input in phrase.narrative_input_list %}
+					<div id="input_container_p_{{phrase.pk}}_{{forloop.counter}}" class="list-s" style="display: none;">
+						<div class="narrative-btn-container">
+							<a id="andor_btn_p_{{input.pk}}" class="btn btn-toolbar hover-shadow" style="display: none;" title="Switch between conjunctions" onclick='change_andor("p_{{input.pk}}")'>And/Or</a>
+						</div>
+						<div class="narrative-input-row">
+							<textarea type="text" id="response_p_{{input.pk}}" class="narrative-input" placeholder="{{input.name}}"></textarea>
+							{% if forloop.counter == phrase.narrative_input_list|length %}
+								<button class="btn btn-save" onclick='add_to_phrase("p_{{input.pk}}", "{{phrase.pk}}", "{{input.marker}}", "{{forloop.counter}}", last=true)'><img src="{% static 'media/submit.png' %}" class="btn-icon">Insert and Add</button>
+							{% else %}
+								<button type="button" class="btn btn-regular" onclick='add_to_phrase("p_{{input.pk}}", "{{phrase.pk}}", "{{input.marker}}", "{{forloop.counter}}")'>Insert</button>
+							{% endif %}
+						</div>
+						<div id="narrative_options_p_{{input.pk}}" class="narrative-input-options">
+							{% for option in input.options %}
+								<input type="checkbox" name="options_p_{{input.pk}}" id="p_{{input.pk}}_{{forloop.counter}}" onclick='update_user_response("p_{{input.pk}}")' value="{{option}}" hidden>
+								<label class="narrative-option hover-shadow" for="p_{{input.pk}}_{{forloop.counter}}">{{option}}</label>
+							{% endfor %}
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+			<div class="modal-row">
+				<textarea id="phrase_content_{{phrase.pk}}" class="narrative-input" oninput="resize_textarea(this)">{{phrase.content}}</textarea>
+				<textarea id="original_p_content_{{phrase.pk}}" hidden>{{phrase.content}}</textarea>
+			</div>
+			{% if not phrase.narrative_input_list %}
+				<div class="modal-btn-row">
+					<button class="btn btn-save" onclick='insert_phrase("{{phrase.pk}}")'><img src="{% static 'media/submit.png' %}" class="btn-icon">Insert and Add</button>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endfor %}
+
+<div id="phrases_list" class="modal">
+	<div class="modal-box mod-box-s">
+		<div class="modal-nav-container">
+			<a class="hover-weight" onclick='close_modal()'>&times;</a>
+		</div>
+		<div class="modal-content"> 
+			<div class="modal-header">Insert a Phrase into the Narrative</div>
+			<div class="modal-btn-row">
+				<label class="owner-select" for="phrase_owner_yours">
+					<input type="radio" id="phrase_owner_yours" name="phrase_owner" value="yours" hidden checked>
+					<span id="phrase_owner_yours_cbox" class="owner-select-cbox"></span>
+					<span>Yours</span>
+				</label>
+				<label class="owner-select" for="phrase_owner_ours">
+					<input type="radio" id="phrase_owner_ours" name="phrase_owner" value="ours" hidden>
+					<span id="phrase_owner_ours_cbox" class="owner-select-cbox"></span>
+					<span>Available</span>
+				</label>
+			</div>
+			<div class="modal-search">
+				<input id="phrase_list_search" class="modal-search-text focus" onkeyup='filter_search(this, "owner_list")' placeholder="Search">
+				<a class="modal-search-icon" onclick='clear_search(this)'>&times;</a>
+			</div>
+			<div id="phrase_list_yours" class="modal-list" name="owner_list">
+				{% if your_phrase_list %}
+					{% for phrase in your_phrase_list %}
+						<div class="modal-list-item hover-shadow" onclick='open_phrase_box("{{phrase.pk}}")'>{{phrase.name}}</div>
+					{% endfor %}
+				{% else %}
+					<div class="empty-list">You have no custom phrases to insert. Create one in the design menu.</div>
+				{% endif %}
+			</div>
+			<div id="phrase_list_ours" class="modal-list" name="owner_list" style="display: none;">
+				{% for phrase in our_phrase_list %}
+					<div class="modal-list-item hover-shadow" onclick='open_phrase_box("{{phrase.pk}}")'>{{phrase.name}}</div>
+				{% endfor %}
+			</div>			
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block js %}
+	{% csrf_token %}
+	{{ narrative.pk|json_script:"narrative_pk" }}
+	{{ input_list|json_script:"input_list" }}
+	<script src="{% static 'javascript/main/narrative.js' %}"></script>
+{% endblock %}

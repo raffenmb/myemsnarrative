@@ -1,0 +1,47 @@
+<!-- templates/accounts/register.html -->
+{% extends 'bases/base.html' %}
+{% load static %}
+
+{% block content %}
+<form id="login_form" class="user-account-box-s mod-box-xs" method="post">
+	{% csrf_token %}
+	<div class="user-account-content">
+		<div class="user-account-row">
+			<div class="user-account-header">Create Account</div>
+		</div>
+		{% if form.errors %}
+		<div class="user-account-row">
+			{% for field in form %}
+				{% for error in field.errors %}
+					<div class="invalid-authentication">{{error|escape}}</div>
+				{% endfor %}
+				{% for error in form.non_field_errors %}
+					<div class="invalid-authentication">{{error|escape}}</div>
+				{% endfor %}
+			{% endfor %}
+		</div>
+		{% endif %}
+		{% for field in form %}
+			<div class="user-account-row">
+				<div class="user-account-subheader">{{field.label_tag}}</div>
+				{{field}}
+			</div>
+		{% endfor %}
+		<div class="user-btn-container">
+			<input type="checkbox" id="agree" name="agree" onchange="switch_disable()">
+  			<label>I agree to the <a onclick='open_modal("terms_of_use")' style="color: blue;">Terms of Use</a> and <a onclick='open_modal("privacy_policy")' style="color: blue;">Privacy Policy</a></label>
+  		</div>
+		<div class="user-btn-container">
+			<button type="submit" id="submit_btn" class="btn btn-regular" disabled>Register</button>
+		</div>
+	</div>
+</form>
+{% endblock %}
+
+{% block modals %}
+	{% include 'misc/terms.html' %}
+{% endblock %}
+
+{% block js %}
+	<script src="{% static 'javascript/accounts/accounts.js' %}"></script>
+{% endblock %}
