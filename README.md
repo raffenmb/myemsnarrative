@@ -2,7 +2,7 @@
 # My EMS Narrative
 
 
-### About The Project
+## About The Project
 
 This project is the source code for the website <a href="https://www.myemsnarrative.com">www.myemsnarrative.com</a>. 
 
@@ -12,11 +12,31 @@ This website was created to help EMS providers write custom narratives for their
 
 ### Built With
 
-* Javascript/JQuery
-* HTML
-* CSS
 * Python3
 * Django Framework
-* MySQL (for deployment)
-* Apache 2 (for deployment)
-* Linode (for deployment)
+* JavaScript/JQuery
+* Ajax
+* HTML
+* CSS
+
+## Installation
+
+1. Clone the repo.
+<!-- tsk --> 
+    git clone https://github.com/raffenbm/myemsnarrative
+3. Go to the local repo folder, create a virtual environment, and activate it.
+<!-- tsk --> 
+    python3 -m venv venv
+<!-- tsk --> 
+    source venv/bin/activate
+3. Pip install the project's requirements.
+<!-- tsk --> 
+    pip install -r requirements.txt
+
+## Usage
+
+To use this project locally, you need to start Django's development server. While still in the main repo folder containing manage.py, run the following:
+<!-- tsk --> 
+    python manage.py runserver
+
+Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) from any browser to begin using the project.
