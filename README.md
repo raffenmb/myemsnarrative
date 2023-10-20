@@ -23,7 +23,7 @@ This website was created to help EMS providers write custom narratives for their
 
 1. Clone the repo.
 <!-- tsk --> 
-    git@github.com:raffenmb/myemsnarrative.git
+    git clone git@github.com:raffenmb/myemsnarrative.git
 3. Go to the local repo folder, create a virtual environment, and activate it.
 <!-- tsk --> 
     python3 -m venv venv
