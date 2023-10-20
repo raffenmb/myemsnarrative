@@ -35,8 +35,19 @@ This website was created to help EMS providers write custom narratives for their
 
 ## Usage
 
+### Activate Deployment Server
+
 To use this project locally, you need to start Django's development server. While still in the main repo folder containing manage.py, run the following:
 <!-- tsk --> 
     python manage.py runserver
 
 Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) from any browser to begin using the project.
+
+### Log In
+
+I've created a basic user for demonstration purposes. After clicking Login in the top right, enter the following credentials:
+
+Email: user@email.com
+Password: Password123
+
+Alternatively, you can register a new user in the deployment server as well.
