@@ -48,6 +48,7 @@ Visit [http://127.0.0.1:8000/](http://127.0.0.1:8000/) from any browser to begin
 I've created a basic user for demonstration purposes. After clicking Login in the top right, enter the following credentials:
 
 Email: user@email.com
+<!-- tsk -->
 Password: Password123
 
 Alternatively, you can register a new user in the deployment server as well.
